@@ -1,0 +1,1016 @@
+--- START OF FILE index.html ---
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dynamic HTML/CSS to DivHunt JSON Converter</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .json-output {
+            font-family: 'JetBrains Mono', 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 13px;
+            line-height: 1.5;
+            tab-size: 2;
+        }
+
+        .code-highlight {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .input-focus:focus {
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+            border-color: #6366f1;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            transition: all 0.3s ease;
+        }
+
+        .btn-secondary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 10px 25px rgba(17, 153, 142, 0.3);
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .stats-card {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.8) 0%, rgba(255, 255, 255, 0.95) 100%);
+            backdrop-filter: blur(10px);
+        }
+    </style>
+</head>
+
+<body class="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100">
+    <div class="container mx-auto px-4 py-8">
+        <!-- Header -->
+        <div class="text-center mb-12">
+            <h1 class="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
+                Dynamic HTML/CSS to JSON
+                <span class="code-highlight bg-clip-text text-transparent">Converter</span>
+            </h1>
+            <p class="text-lg text-gray-600 max-w-2xl mx-auto">
+                Конвертує структуру HTML та стилі CSS у формат DivHunt JSON
+            </p>
+        </div>
+
+        <!-- Stats Section -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8 max-w-4xl mx-auto">
+            <div class="stats-card p-4 rounded-xl text-center">
+                <div class="text-2xl font-bold text-blue-600" id="classesFound">0</div>
+                <div class="text-sm text-gray-600">Classes found</div>
+            </div>
+            <div class="stats-card p-4 rounded-xl text-center">
+                <div class="text-2xl font-bold text-green-600" id="classesConverted">0</div>
+                <div class="text-sm text-gray-600">Rules applied</div>
+            </div>
+            <div class="stats-card p-4 rounded-xl text-center">
+                <div class="text-2xl font-bold text-purple-600" id="breakpoints">0</div>
+                <div class="text-sm text-gray-600">breakpoints</div>
+            </div>
+            <div class="stats-card p-4 rounded-xl text-center">
+                <div class="text-2xl font-bold text-orange-600" id="elements">0</div>
+                <div class="text-sm text-gray-600">Elements</div>
+            </div>
+        </div>
+
+        <!-- Main Converter -->
+        <div class="max-w-7xl mx-auto">
+            <div class="grid lg:grid-cols-2 gap-8">
+                <!-- Input Section: HTML and CSS -->
+                <div class="space-y-8">
+                    <!-- HTML Input -->
+                    <div class="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
+                        <div class="bg-gradient-to-r from-gray-50 to-gray-100 px-6 py-4 border-b border-gray-200">
+                            <h2 class="text-xl font-semibold text-gray-800 flex items-center">
+                                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"></path>
+                                </svg>
+                                HTML Input
+                            </h2>
+                            <p class="text-sm text-gray-500 mt-1">Put your raw HTML structure</p>
+                        </div>
+                        <div class="p-6">
+                            <textarea id="htmlInput"
+                                class="w-full h-48 p-4 border border-gray-200 rounded-xl font-mono text-sm resize-none input-focus transition-all duration-200"
+                                placeholder="<div class=&quot;card flex&quot;>
+  <h1 id=&quot;main-heading&quot;>Hello World!</h1>
+  <p class=&quot;text-content&quot;>This is a test paragraph.</p>
+  <button class=&quot;my-button&quot;>Click Me</button>
+</div>"></textarea>
+                        </div>
+                    </div>
+
+                    <!-- CSS Input -->
+                    <div class="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
+                        <div class="bg-gradient-to-r from-teal-50 to-teal-100 px-6 py-4 border-b border-gray-200">
+                            <h2 class="text-xl font-semibold text-gray-800 flex items-center">
+                                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01">
+                                    </path>
+                                </svg>
+                                CSS Input
+                            </h2>
+                            <p class="text-sm text-gray-500 mt-1">Put your standard CSS rules here (classes, IDs, tags)</p>
+                        </div>
+                        <div class="p-6">
+                            <textarea id="cssInput"
+                                class="w-full h-48 p-4 border border-gray-200 rounded-xl font-mono text-sm resize-none input-focus transition-all duration-200"
+                                placeholder=".card { max-width: 400px; margin: 2rem auto; padding: 1.5rem; border-radius: 12px; background-color: #fff; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); }
+.flex { display: flex; flex-direction: column; gap: 1rem; }
+#main-heading { color: #333; font-size: 24px; }
+.my-button { background-color: #4f46e5; color: white; padding: 10px 20px; border: none; border-radius: 6px; cursor: pointer; }
+@media (min-width: 992px) {
+  .flex { flex-direction: row; }
+}"></textarea>
+                            <button id="convertBtn"
+                                class="mt-4 w-full btn-primary text-white py-3 px-6 rounded-xl font-medium text-sm">
+                                <span class="flex items-center justify-center">
+                                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path>
+                                    </svg>
+                                    Convert to JSON
+                                </span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Output Section -->
+                <div class="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
+                    <div class="bg-gradient-to-r from-emerald-50 to-emerald-100 px-6 py-4 border-b border-gray-200">
+                        <h2 class="text-xl font-semibold text-gray-800 flex items-center">
+                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
+                                </path>
+                            </svg>
+                            JSON Output
+                        </h2>
+                        <p class="text-sm text-gray-500 mt-1">Structured DivHunt JSON</p>
+                    </div>
+                    <div class="p-6">
+                        <div class="relative">
+                            <textarea id="jsonOutput"
+                                class="w-full h-[41rem] p-4 border border-gray-200 rounded-xl bg-gray-50 json-output text-gray-800 resize-none"
+                                placeholder="Ваш конвертований JSON з'явиться тут..." readonly></textarea>
+                            <div id="emptyState"
+                                class="absolute inset-0 flex items-center justify-center text-gray-400 pointer-events-none">
+                                <div class="text-center">
+                                    <svg class="w-12 h-12 mx-auto mb-4 opacity-50" fill="none" stroke="currentColor"
+                                        viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1"
+                                            d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
+                                        </path>
+                                    </svg>
+                                    <p class="font-medium">Ready to conversion</p>
+                                </div>
+                            </div>
+                        </div>
+                        <button id="copyBtn"
+                            class="mt-4 w-full btn-secondary text-white py-3 px-6 rounded-xl font-medium text-sm"
+                            style="display: none;">
+                            <span class="flex items-center justify-center">
+                                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3">
+                                    </path>
+                                </svg>
+                                Copy the JSON
+                            </span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Detected Classes Section -->
+        <div class="max-w-7xl mx-auto mt-8" id="detectedClassesSection" style="display: none;">
+            <div class="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
+                <div class="bg-gradient-to-r from-blue-50 to-blue-100 px-6 py-4 border-b border-gray-200">
+                    <h2 class="text-xl font-semibold text-gray-800 flex items-center">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V5a2 2 0 00-2-2H9z"></path>
+                        </svg>
+                        Detected and Applied CSS
+                    </h2>
+                </div>
+                <div class="p-6">
+                    <div id="detectedClasses" class="grid gap-2"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Features -->
+        <div class="max-w-6xl mx-auto mt-16">
+            <h2 class="text-2xl font-bold text-center text-gray-900 mb-8">Opportunities</h2>
+            <div class="grid md:grid-cols-3 gap-6">
+                <div class="text-center p-6 bg-white rounded-xl shadow-lg border border-gray-100">
+                    <div class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center mx-auto mb-4">
+                        <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                        </svg>
+                    </div>
+                    <h3 class="text-lg font-semibold text-gray-900 mb-2">CSS Parsing</h3>
+                    <p class="text-gray-600 text-sm">Simple parsing of CSS rules (.class, #id, tag) and properties</p>
+                </div>
+                <div class="text-center p-6 bg-white rounded-xl shadow-lg border border-gray-100">
+                    <div class="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center mx-auto mb-4">
+                        <svg class="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z">
+                            </path>
+                        </svg>
+                    </div>
+                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Basic Media Query</h3>
+                    <p class="text-gray-600 text-sm">Conversion of basic @media (min-width: Npx) to DivHunt breakpoints</p>
+                </div>
+                <div class="text-center p-6 bg-white rounded-xl shadow-lg border border-gray-100">
+                    <div class="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center mx-auto mb-4">
+                        <svg class="w-4 h-4 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01">
+                            </path>
+                        </svg>
+                    </div>
+                    <h3 class="text-lg font-semibold text-gray-900 mb-2">HTML Structure</h3>
+                    <p class="text-gray-600 text-sm">Recursive conversion of HTML elements to DivHunt JSON structure</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<script>
+    class DynamicHtmlCssConverter {
+        constructor() {
+            this.order = 100;
+            this.parsedCssRules = {};
+            this.detectedHtmlClasses = new Set();
+            this.appliedCssRules = new Set();
+
+            this.divHuntBreakpoints = {
+                '480': 480,
+                '991': 991,
+                '1280': 1280,
+                '1400': 1400,
+                '1920': 1920
+            };
+
+            this.allBreakpoints = Object.keys(this.divHuntBreakpoints).sort((a, b) => parseInt(a) - parseInt(b));
+            this.allBreakpointsNumeric = this.allBreakpoints.map(Number);
+        }
+
+        camelCaseToKebabCase(str) {
+            return str.replace(/([a-z0-9]|(?=[A-Z]))([A-Z])/g, '$1-$2').toLowerCase();
+        }
+
+        mapWidthToDivHuntBreakpoint(width) {
+            const breakpoints = this.allBreakpoints.map(w => parseInt(w));
+            for (let i = 0; i < breakpoints.length; i++) {
+                if (breakpoints[i] >= width) {
+                    return breakpoints[i].toString();
+                }
+            }
+            return this.allBreakpoints[this.allBreakpoints.length - 1];
+        }
+
+        parseCss(cssString) {
+            this.parsedCssRules = {};
+
+            const minWidthRegex = /@media\s*\((min-width:\s*(\d+)(px))\)\s*{([\s\S]+?)}/g;
+            const maxWidthRegex = /@media\s*\((max-width:\s*(\d+)(px))\)\s*{([\s\S]+?)}/g;
+            
+            let cssToProcess = cssString;
+
+            // 1. Обробка max-width (інверсія)
+            let maxWidthMatch;
+            while ((maxWidthMatch = maxWidthRegex.exec(cssString)) !== null) {
+                const width = parseInt(maxWidthMatch[2]);
+                const rules = maxWidthMatch[4].trim();
+                
+                this.allBreakpoints.forEach(bp => {
+                    if (this.divHuntBreakpoints[bp] <= width) {
+                         this._processRules(rules, bp);
+                    }
+                });
+            }
+            
+            // 2. Обробка min-width (стандартно)
+            let minWidthMatch;
+            while ((minWidthMatch = minWidthRegex.exec(cssString)) !== null) {
+                const width = parseInt(minWidthMatch[2]);
+                const rules = minWidthMatch[4].trim();
+                
+                this.allBreakpoints.forEach(bp => {
+                    if (this.divHuntBreakpoints[bp] >= width) {
+                         this._processRules(rules, bp);
+                    }
+                });
+            }
+
+            // 3. Обробка базових стилів (без медіа-запитів)
+            cssToProcess = cssToProcess.replace(minWidthRegex, '').replace(maxWidthRegex, '').trim();
+            this._processRules(cssToProcess, '1920');
+        }
+
+        _processRules(rulesString, breakpoint) {
+            const ruleRegex = /([^{]+){([^}]+)}/g; 
+            let match;
+
+            while ((match = ruleRegex.exec(rulesString)) !== null) {
+                const rawSelectors = match[1].split(',').map(s => s.trim()).filter(s => s);
+                const declarations = match[2].split(';').map(d => d.trim()).filter(d => d);
+
+                const cssProps = {};
+                declarations.forEach(decl => {
+                    const parts = decl.split(':').map(p => p.trim());
+                    if (parts.length >= 2) {
+                        const propName = this.camelCaseToKebabCase(parts[0]);
+                        const propValue = parts.slice(1).join(':').trim();
+                        cssProps[propName] = propValue;
+                    }
+                });
+
+                rawSelectors.forEach(selector => {
+                    const fullSelector = selector.trim();
+                    
+                    if (!this.parsedCssRules[fullSelector]) {
+                        this.parsedCssRules[fullSelector] = {};
+                    }
+                    if (!this.parsedCssRules[fullSelector][breakpoint]) {
+                        this.parsedCssRules[fullSelector][breakpoint] = {};
+                    }
+                    Object.assign(this.parsedCssRules[fullSelector][breakpoint], cssProps);
+                });
+            }
+        }
+
+        extractClassesFromHTML(htmlString) {
+            const classRegex = /class=["']([^"']*)["']/g;
+            const classes = new Set();
+            let match;
+
+            while ((match = classRegex.exec(htmlString)) !== null) {
+                const classList = match[1].split(/\s+/).filter(cls => cls.trim());
+                classList.forEach(cls => classes.add(cls));
+            }
+
+            this.detectedHtmlClasses = classes;
+            return Array.from(classes);
+        }
+        
+        _parseInlineStyles(styleString) {
+            const inlineCss = {};
+            if (!styleString) return inlineCss;
+
+            const declarations = styleString.split(';').map(d => d.trim()).filter(d => d);
+
+            declarations.forEach(decl => {
+                const parts = decl.split(':').map(p => p.trim());
+                if (parts.length >= 2) {
+                    const propName = this.camelCaseToKebabCase(parts[0]);
+                    const propValue = parts.slice(1).join(':').trim();
+                    inlineCss[propName] = propValue;
+                }
+            });
+            return inlineCss;
+        }
+
+        applyCssAndClassesToElement(element) {
+            const elementCss = {};
+            const elementClasses = element.className ? element.className.split(/\s+/).filter(cls => cls.trim()) : [];
+            const elementId = element.id ? `#${element.id}` : null;
+            const tagName = element.tagName.toLowerCase();
+
+            if (element.className === 'dh-page-wrapper-temp') {
+                 return { elementCss: {}, classListJson: { '1': [] } };
+            }
+
+            const classListJson = { '1': elementClasses.map(className => ({ name: className, css: {} })) };
+
+            const allSelectors = [tagName, ...elementClasses.map(cls => `.${cls}`), elementId].filter(s => s);
+
+            // 1. Cascade and consolidate styles
+            this.allBreakpoints.reverse().forEach((bp) => {
+                const bpId = bp.toString();
+                const largerBpIndex = this.allBreakpoints.indexOf(bp) - 1;
+                const largerBp = this.allBreakpoints[largerBpIndex];
+                
+                // --- Tag and ID style merging (for elementCss) ---
+                const elementStyles = {};
+                const pseudoTagIdStyles = {};
+                
+                // 2.1 Inherit from larger breakpoint's elementCss
+                if (elementCss[largerBp] && elementCss[largerBp]['self']) {
+                    Object.assign(elementStyles, elementCss[largerBp]['self']);
+                }
+                
+                // 2.2 Apply/Merge Tag and ID styles and Комбінатори (найвища специфічність)
+                Object.keys(this.parsedCssRules).forEach(fullSelector => {
+                    const selectorRules = this.parsedCssRules[fullSelector]?.[bp];
+                    if (!selectorRules) return;
+
+                    // A. Simple Tag/ID
+                    if (fullSelector === tagName || fullSelector === elementId) {
+                        Object.assign(elementStyles, selectorRules);
+                        this.appliedCssRules.add(fullSelector);
+                    } 
+                    // B. Комбінатори (hero h1, about-text p) -> застосовуємо як локальні стилі
+                    else if ((fullSelector.includes(' ') || fullSelector.includes('>')) && fullSelector.endsWith(tagName) && !fullSelector.includes(':')) {
+                         Object.assign(elementStyles, selectorRules);
+                         this.appliedCssRules.add(fullSelector);
+                    }
+                    // C. Псевдостилі Tag/ID
+                    else if (fullSelector.startsWith(tagName + ':') || fullSelector.startsWith(elementId + ':')) {
+                         const pseudoKey = fullSelector.substring(fullSelector.startsWith(tagName) ? tagName.length : elementId.length);
+                         if (allSelectors.includes(fullSelector.split(':')[0])) { 
+                             if (!pseudoTagIdStyles[pseudoKey]) pseudoTagIdStyles[pseudoKey] = {};
+                             Object.assign(pseudoTagIdStyles[pseudoKey], selectorRules);
+                             this.appliedCssRules.add(fullSelector);
+                         }
+                    }
+                });
+                
+                // 2.3 Apply INLINE styles (найвищий пріоритет)
+                const inlineStyles = this._parseInlineStyles(element.getAttribute('style'));
+                if (bpId === '1920' && Object.keys(inlineStyles).length > 0) {
+                     Object.assign(elementStyles, inlineStyles);
+                }
+
+                if (Object.keys(elementStyles).length > 0 || Object.keys(pseudoTagIdStyles).length > 0) {
+                    if (!elementCss[bpId]) elementCss[bpId] = {};
+                    elementCss[bpId]['self'] = elementStyles;
+                    Object.assign(elementCss[bpId], pseudoTagIdStyles);
+                }
+
+
+                // --- Class style merging (for classListJson) ---
+                elementClasses.forEach(className => {
+                    const selector = `.${className}`;
+                    let classObj = classListJson['1'].find(c => c.name === className);
+                    
+                    if (classObj) {
+                        const currentClassStyles = {}; 
+                        
+                        if (largerBp && classObj.css[largerBp]) {
+                             Object.assign(currentClassStyles, classObj.css[largerBp]);
+                        }
+                        
+                        // Звичайні стилі класу
+                        const classBaseStyles = this.parsedCssRules[selector]?.[bp] || {};
+                        
+                        // ДОДАТКОВЕ ВИПРАВЛЕННЯ: Додаємо стилі комбінаторів, що починаються з цього класу, до класу
+                        Object.keys(this.parsedCssRules).forEach(fullSelector => {
+                            if (fullSelector.startsWith(selector + ' ') && !fullSelector.includes(':')) {
+                                Object.assign(classBaseStyles, this.parsedCssRules[fullSelector][bp]);
+                                this.appliedCssRules.add(fullSelector);
+                            }
+                        });
+
+
+                        if (Object.keys(classBaseStyles).length > 0) {
+                            if (!currentClassStyles['self']) currentClassStyles['self'] = {};
+                            Object.assign(currentClassStyles['self'], classBaseStyles);
+                        }
+                        
+                        // Псевдостилі класу
+                        Object.keys(this.parsedCssRules).forEach(fullSelector => {
+                            if (fullSelector.startsWith(selector + ':') && this.parsedCssRules[fullSelector][bp]) {
+                                 const pseudoKey = fullSelector.substring(selector.length);
+                                 if (!currentClassStyles[pseudoKey]) currentClassStyles[pseudoKey] = {};
+                                 Object.assign(currentClassStyles[pseudoKey], this.parsedCssRules[fullSelector][bp]);
+                            }
+                        });
+
+
+                        if (Object.keys(currentClassStyles).length > 0) {
+                            if (!classObj.css[bpId]) classObj.css[bpId] = {};
+                            Object.assign(classObj.css[bpId], currentClassStyles);
+                        }
+                    }
+                });
+            });
+
+            this.allBreakpoints.reverse(); // Restore order
+
+            // 3. Final cleanup and formatting
+            classListJson['1'] = classListJson['1'].filter(classObj => {
+                const selector = `.${classObj.name}`;
+                
+                // Перевірка на відсутність стилів після каскадування
+                const isCssObjectEmpty = Object.keys(classObj.css).length === 0;
+
+                // --- UNIQUE STYLE FIX (APPLY) ---
+                if (isCssObjectEmpty) {
+                    classObj.css = { '1920': { 'self': { [`--dh-u-${classObj.name}`]: '0' } } };
+                }
+
+                // Видаляємо порожні 'self' об'єкти (після додавання змінної)
+                Object.keys(classObj.css).forEach(bp => {
+                    const self = classObj.css[bp]['self'];
+                    if (self) {
+                        const uniqueMarker = `--dh-u-${classObj.name}`;
+                        if (self[uniqueMarker] && Object.keys(self).length > 1) {
+                             delete self[uniqueMarker];
+                        }
+                    }
+                    if (Object.keys(classObj.css[bp] || {}).length === 0) {
+                        delete classObj.css[bp];
+                    }
+                });
+                
+                // Якщо поле css все ще порожнє, залишаємо його як {}
+                if (Object.keys(classObj.css).length === 0) {
+                    classObj.css = {};
+                }
+                
+                return true; 
+            });
+
+
+            const finalClassListJson = classListJson['1'].length > 0 ? classListJson : {};
+
+            return { elementCss: elementCss, classListJson: finalClassListJson };
+        }
+
+        /**
+         * Utility to parse HTML and get the root element.
+         */
+        parseHTML(htmlString) {
+            try {
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(htmlString.trim(), 'text/html');
+
+                const parserError = doc.querySelector('parsererror');
+                if (parserError) {
+                    return null;
+                }
+                
+                const bodyChildren = Array.from(doc.body.children).filter(el => el.tagName.toLowerCase() !== 'script' && el.tagName.toLowerCase() !== 'style');
+                let rootElement = null;
+
+                if (bodyChildren.length > 1) {
+                    const tempDiv = doc.createElement('div');
+                    tempDiv.className = 'dh-page-wrapper-temp';
+                    bodyChildren.forEach(child => tempDiv.appendChild(child.cloneNode(true)));
+                    rootElement = tempDiv;
+                } else if (bodyChildren.length === 1) {
+                    rootElement = bodyChildren[0];
+                } else {
+                    return null;
+                }
+
+                if (!rootElement) {
+                    return null;
+                }
+
+                return rootElement;
+            } catch (error) {
+                return null;
+            }
+        }
+
+        /**
+         * Utility to determine the element's label for DivHunt.
+         * Оновлено, щоб використовувати перший клас як назву.
+         */
+        getElementLabel(tagName, classes = '') {
+            const lowerTag = tagName.toLowerCase();
+            const firstClass = classes.split(/\s+/).filter(cls => cls.trim())[0];
+
+            if (firstClass) {
+                 return firstClass.charAt(0).toUpperCase() + firstClass.slice(1).replace(/-(\w)/g, (_, c) => ' ' + c.toUpperCase());
+            }
+
+            if (lowerTag === 'div') return 'Div';
+            const labels = {
+                'section': 'Section', 'h1': 'Heading 1', 'h2': 'Heading 2', 'p': 'Paragraph',
+                'img': 'Image', 'a': 'Link', 'button': 'Button', 'span': 'Span', 
+                'nav': 'Navigation', 'header': 'Header', 'footer': 'Footer', 'main': 'Main', 
+                'article': 'Article', 'blockquote': 'Blockquote'
+            };
+            return labels[lowerTag] || lowerTag.charAt(0).toUpperCase() + lowerTag.slice(1);
+        }
+
+        _getElementAttributes(element) {
+            const attributes = {};
+            for (let i = 0; i < element.attributes.length; i++) {
+                const attr = element.attributes[i];
+                // 1. Обробка ID окремо, як атрибут першого рівня
+                if (attr.name === 'id') {
+                    if (!attributes['1']) attributes['1'] = {};
+                    attributes['1'][attr.name] = attr.value;
+                    continue;
+                }
+                
+                // 2. Обробка style та class в applyCssAndClassesToElement
+                if (attr.name === 'style' || attr.name === 'class') {
+                    continue; 
+                }
+
+                // 3. Інші атрибути
+                if (!attributes['1']) attributes['1'] = {};
+                attributes['1'][attr.name] = attr.value;
+            }
+            return attributes;
+        }
+
+        convertElementToJson(element) {
+            const tagName = element.tagName.toLowerCase();
+            const classesString = typeof element.className === 'string' ? element.className : (element.className?.baseVal || '');
+            
+            let name = tagName;
+            let label = this.getElementLabel(tagName, classesString);
+            const isButton = tagName === 'button' || (tagName === 'a' && element.hasAttribute('href') && element.textContent.trim());
+
+            if (element.className === 'dh-page-wrapper-temp') {
+                 return { tags: Array.from(element.children).map(child => this.convertElementToJson(child)), skip: true };
+            }
+            
+            if (isButton && tagName !== 'a') {
+                name = 'a';
+                label = this.getElementLabel(tagName, classesString);
+            } else if (tagName === 'a') {
+                 label = this.getElementLabel(tagName, classesString);
+            }
+
+            const childTags = [];
+            let childOrder = 100;
+            let elementText = null;
+
+            for (let child of element.childNodes) {
+                if (child.nodeType === 1) { // Element (div, img, svg, etc)
+                    const childJson = this.convertElementToJson(child);
+                    if (!childJson.skip) {
+                        childJson.order = childOrder;
+                        childTags.push(childJson);
+                        childOrder += 100;
+                    } else {
+                        childJson.tags.forEach(grandChild => {
+                            grandChild.order = childOrder;
+                            childTags.push(grandChild);
+                            childOrder += 100;
+                        });
+                    }
+                } else if (child.nodeType === 3) { // Text node
+                    const textValue = child.textContent.replace(/\s+/g, ' ').trim();
+                    if (textValue) {
+                        if (childTags.length === 0) {
+                            elementText = { '1': textValue };
+                        } else {
+                            if (isButton || tagName === 'a') {
+                                // Text inside button/link with other elements needs wrapping in span
+                                childTags.push({
+                                    tags: [],
+                                    symbol: null,
+                                    order: childOrder,
+                                    loop: 1,
+                                    name: 'span',
+                                    label: 'Span',
+                                    attributes: {},
+                                    classes: {},
+                                    conditions: {},
+                                    properties: {},
+                                    interactions: {},
+                                    text: { '1': textValue },
+                                    css: {},
+                                    Target: null
+                                });
+                                childOrder += 100;
+                            } else {
+                                elementText = { '1': textValue };
+                            }
+                        }
+                    }
+                }
+            }
+            
+            const isWrapperElement = childTags.length > 0 && !elementText;
+            const finalElementText = isWrapperElement ? {} : (elementText || {});
+            
+            const { elementCss, classListJson } = this.applyCssAndClassesToElement(element);
+
+
+            return {
+                tags: childTags,
+                symbol: null,
+                order: this.order,
+                loop: 1,
+                name: name,
+                label: label,
+                iterable: null,
+                attributes: this._getElementAttributes(element),
+                classes: classListJson,
+                conditions: {},
+                properties: {},
+                interactions: {},
+                text: finalElementText,
+                css: elementCss,
+                Target: null,
+                skip: false
+            };
+        }
+
+        countElements(element) {
+            let count = 1;
+            if (element.tags && element.tags.length > 0) {
+                for (let child of element.tags) {
+                    count += this.countElements(child);
+                }
+            }
+            return count;
+        }
+
+        convert(htmlString, cssString) {
+            this.order = 100;
+            this.detectedHtmlClasses.clear();
+            this.appliedCssRules.clear();
+            this.parsedCssRules = {};
+
+            this.parseCss(cssString);
+            this.extractClassesFromHTML(htmlString);
+
+            const rootElement = this.parseHTML(htmlString);
+            if (!rootElement) {
+                throw new Error('Could not parse HTML. Please check if your HTML is well-formed or contains any elements.');
+            }
+
+            let result = this.convertElementToJson(rootElement);
+            
+            if (result.skip) {
+                 result = { tags: result.tags, name: 'div', label: 'Root Elements', css: {} };
+            }
+
+
+            const elementCount = this.countElements(result);
+
+            return {
+                result: result,
+                stats: {
+                    detectedClasses: this.detectedHtmlClasses.size,
+                    convertedClasses: this.appliedCssRules.size,
+                    breakpoints: this.allBreakpoints.length,
+                    elements: elementCount
+                }
+            };
+        }
+
+        getDetectedClassesInfo() {
+            const detected = Array.from(this.detectedHtmlClasses);
+            const converted = new Set();
+            const unconverted = new Set();
+
+            detected.forEach(htmlClass => {
+                const classSelector = `.${htmlClass}`;
+                if (this.parsedCssRules[classSelector] && Object.keys(this.parsedCssRules[classSelector]).length > 0) {
+                    converted.add(htmlClass);
+                } else {
+                    unconverted.add(htmlClass);
+                }
+            });
+
+            return {
+                detected: detected,
+                converted: Array.from(converted),
+                unconverted: Array.from(unconverted)
+            };
+        }
+    }
+
+
+    // Initialize converter
+    const converter = new DynamicHtmlCssConverter();
+
+    // DOM elements
+    const htmlInput = document.getElementById('htmlInput');
+    const cssInput = document.getElementById('cssInput');
+    const jsonOutput = document.getElementById('jsonOutput');
+    const convertBtn = document.getElementById('convertBtn');
+    const copyBtn = document.getElementById('copyBtn');
+    const emptyState = document.getElementById('emptyState');
+
+    // Stats elements
+    const classesFoundEl = document.getElementById('classesFound');
+    const classesConvertedEl = document.getElementById('classesConverted');
+    const breakpointsEl = document.getElementById('breakpoints');
+    const elementsEl = document.getElementById('elements');
+
+    // Detected classes section
+    const detectedClassesSection = document.getElementById('detectedClassesSection');
+    const detectedClassesEl = document.getElementById('detectedClasses');
+
+    function updateStats(stats) {
+        classesFoundEl.textContent = stats.detectedClasses;
+        classesConvertedEl.textContent = stats.convertedClasses;
+        breakpointsEl.textContent = stats.breakpoints;
+        elementsEl.textContent = stats.elements;
+    }
+
+    function displayDetectedClasses() {
+        const classesInfo = converter.getDetectedClassesInfo();
+
+        if (classesInfo.detected.length === 0) {
+            detectedClassesSection.style.display = 'none';
+            return;
+        }
+
+        detectedClassesSection.style.display = 'block';
+        detectedClassesEl.innerHTML = '';
+
+        // Display classes found in HTML
+        if (classesInfo.detected.length > 0) {
+            const detectedHeader = document.createElement('div');
+            detectedHeader.className = 'mb-3';
+            detectedHeader.innerHTML = `
+                <h4 class="text-sm font-semibold text-blue-700 mb-2">
+                    🔎 Classes found in HTML (${classesInfo.detected.length})
+                </h4>
+            `;
+            detectedClassesEl.appendChild(detectedHeader);
+
+            const detectedContainer = document.createElement('div');
+            detectedContainer.className = 'flex flex-wrap gap-2 mb-4';
+
+            classesInfo.detected.forEach(className => {
+                const isConverted = classesInfo.converted.includes(className);
+                const badge = document.createElement('span');
+                badge.className = `px-2 py-1 text-xs rounded-md font-mono ${isConverted ? 'bg-green-100 text-green-800' : 'bg-orange-100 text-orange-800'}`;
+                badge.textContent = className;
+                detectedContainer.appendChild(badge);
+            });
+
+            detectedClassesEl.appendChild(detectedContainer);
+        }
+
+        // Display applied/non-applied CSS Selectors
+        const appliedSelectors = Array.from(converter.appliedCssRules);
+        const allSelectors = Object.keys(converter.parsedCssRules);
+        const unusedSelectors = allSelectors.filter(sel => !appliedSelectors.includes(sel));
+
+
+        // Display applied rules
+        if (appliedSelectors.length > 0) {
+            const appliedHeader = document.createElement('div');
+            appliedHeader.className = 'mb-3';
+            appliedHeader.innerHTML = `
+                <h4 class="text-sm font-semibold text-green-700 mb-2">
+                    ✅ CSS Selectors Applied (${appliedSelectors.length})
+                </h4>
+            `;
+            detectedClassesEl.appendChild(appliedHeader);
+
+            const appliedContainer = document.createElement('div');
+            appliedContainer.className = 'flex flex-wrap gap-2 mb-4';
+
+            appliedSelectors.forEach(selector => {
+                const badge = document.createElement('span');
+                badge.className = 'px-2 py-1 bg-green-100 text-green-800 text-xs rounded-md font-mono';
+                badge.textContent = selector;
+                appliedContainer.appendChild(badge);
+            });
+
+            detectedClassesEl.appendChild(appliedContainer);
+        }
+
+        // Display unused rules
+        if (unusedSelectors.length > 0) {
+            const unusedHeader = document.createElement('div');
+            unusedHeader.className = 'mb-3';
+            unusedHeader.innerHTML = `
+                <h4 class="text-sm font-semibold text-red-700 mb-2">
+                    ❌ CSS Selectors Unused (${unusedSelectors.length})
+                </h4>
+            `;
+            detectedClassesEl.appendChild(unusedHeader);
+
+            const unusedContainer = document.createElement('div');
+            unusedContainer.className = 'flex flex-wrap gap-2';
+
+            unusedSelectors.forEach(selector => {
+                const badge = document.createElement('span');
+                badge.className = 'px-2 py-1 bg-red-100 text-red-800 text-xs rounded-md font-mono';
+                badge.textContent = selector;
+                unusedContainer.appendChild(badge);
+            });
+
+            detectedClassesEl.appendChild(unusedContainer);
+        }
+    }
+
+    // Event handlers
+    convertBtn.addEventListener('click', () => {
+        const htmlCode = htmlInput.value.trim();
+        const cssCode = cssInput.value.trim();
+
+        if (!htmlCode) {
+            jsonOutput.value = 'Будь ласка, введіть HTML код.';
+            emptyState.style.display = 'none';
+            copyBtn.style.display = 'none';
+            updateStats({ detectedClasses: 0, convertedClasses: 0, breakpoints: 0, elements: 0 });
+            detectedClassesSection.style.display = 'none';
+            return;
+        }
+
+        try {
+            const conversionResult = converter.convert(htmlCode, cssCode);
+            const formattedJson = JSON.stringify(conversionResult.result, null, 2);
+
+            jsonOutput.value = formattedJson;
+            emptyState.style.display = 'none';
+            copyBtn.style.display = 'block';
+            jsonOutput.classList.add('fade-in');
+
+            // Update stats
+            updateStats(conversionResult.stats);
+
+            // Display detected classes
+            displayDetectedClasses();
+
+        } catch (error) {
+            jsonOutput.value = `Помилка конвертації: ${error.message}`;
+            emptyState.style.display = 'none';
+            copyBtn.style.display = 'none';
+            updateStats({ detectedClasses: 0, convertedClasses: 0, breakpoints: 0, elements: 0 });
+            detectedClassesSection.style.display = 'none';
+        }
+    });
+
+    copyBtn.addEventListener('click', () => {
+        navigator.clipboard.writeText(jsonOutput.value).then(() => {
+            const originalText = copyBtn.innerHTML;
+            copyBtn.innerHTML = `
+                <span class="flex items-center justify-center">
+                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                    </svg>
+                    Скопійовано!
+                </span>
+            `;
+
+            setTimeout(() => {
+                copyBtn.innerHTML = originalText;
+            }, 2000);
+        }).catch(() => {
+            alert('Помилка копіювання. Спробуйте ще раз.');
+        });
+    });
+
+    // Auto-convert on input (debounced)
+    let timeoutId;
+    const autoConvert = () => {
+        clearTimeout(timeoutId);
+        timeoutId = setTimeout(() => {
+            if (htmlInput.value.trim() && cssInput.value.trim()) {
+                convertBtn.click();
+            }
+        }, 1000);
+    };
+
+    htmlInput.addEventListener('input', autoConvert);
+    cssInput.addEventListener('input', autoConvert);
+
+    // Load example on page load
+    window.addEventListener('load', () => {
+        if (htmlInput.placeholder) {
+            htmlInput.value = htmlInput.placeholder;
+            cssInput.value = cssInput.placeholder;
+            convertBtn.click();
+        }
+    });
+</script>
+</body>
+
+</html>
